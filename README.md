@@ -18,8 +18,3 @@ Track income, expenses, savings, investments—and project your future based on 
 - 🔍 Two types of projections:
   - Quick next-month estimate
   - Detailed multi-month simulation (real adjusted balance)
-
----
-
-## 📸 Example Menu
-
