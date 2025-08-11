@@ -4,11 +4,11 @@
 #include <limits>
 using namespace std;
 
-const string R = "\033[31m";  // red
-const string G = "\033[32m";  // green
-const string Y = "\033[33m";  // yellow
-const string C = "\033[36m";  // cyan
-const string X = "\033[0m";   // reset
+const string R = "\033[31m";  
+const string G = "\033[32m";  
+const string Y = "\033[33m";  
+const string C = "\033[36m";  
+const string X = "\033[0m";   
 
 double getnum(const string &msg) {
     double v;
