@@ -2,200 +2,190 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
-
 using namespace std;
 
-const string RED   = "\033[31m";
-const string GREEN = "\033[32m";
-const string YELLOW = "\033[33m";
-const string CYAN  = "\033[36m";
-const string RESET = "\033[0m";
+const string R = "\033[31m";  // red
+const string G = "\033[32m";  // green
+const string Y = "\033[33m";  // yellow
+const string C = "\033[36m";  // cyan
+const string X = "\033[0m";   // reset
 
-double readNonNegative(const string& label) {
+double getnum(const string &msg) {
     double v;
     while (true) {
-        cout << label;
+        cout << msg;
         if (cin >> v && v >= 0) return v;
-        cout << RED << "Value must be ≥ 0. Try again.\n" << RESET;
+        cout << R << "Enter >= 0\n" << X;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 }
 
-class emp {
-private:
-    string name;
-    int age{};
-    double salary{}, expense{}, savings{}, invest{};
-    double salhike{}, exphike{}, savinc{}, invhike{};
-    double taxRate{}, inflationRate{};          // annual %
-    bool hikesSet{false};
+class person {
+    string nm;
+    int ag{};
+    double sal{}, exp{}, sav{}, inv{};
+    double sh{}, eh{}, svh{}, ivh{};
+    double tax{}, infl{};
+    bool hikeset{false};
 
 public:
-    void setData() {
-        cout << CYAN << "\n[SETUP] Enter your data:\n" << RESET;
-        cout << "Name: ";
-        cin >> name;
-        age = static_cast<int>(readNonNegative("Age: "));
-        salary   = readNonNegative("Monthly Salary: ");
-        expense  = readNonNegative("Monthly Expense: ");
-        savings  = readNonNegative("Monthly Savings: ");
-        invest   = readNonNegative("Monthly Investments: ");
-    }
-    void setRates() {
-        cout << CYAN << "\n[SETUP] Enter tax & inflation:\n" << RESET;
-        taxRate       = readNonNegative("Annual Tax Rate (% of income): ");
-        inflationRate = readNonNegative("Annual Inflation Rate (%): ");
+    void setdata() {
+        cout << C << "\nEnter details:\n" << X;
+        cout << "Name: "; cin >> nm;
+        ag = (int)getnum("Age: ");
+        sal = getnum("Salary: ");
+        exp = getnum("Expense: ");
+        sav = getnum("Savings: ");
+        inv = getnum("Invest: ");
     }
 
-    void showData() const {
-        cout << YELLOW << fixed << setprecision(2)
-             << "\n[SUMMARY] Snapshot\n"
-             << "Name: "        << name    << "\n"
-             << "Age: "         << age     << "\n"
-             << "Salary: ₹"     << salary  << "\n"
-             << "Expenses: ₹"   << expense << "\n"
-             << "Savings: ₹"    << savings << "\n"
-             << "Investments: ₹"<< invest  << "\n"
-             << "Net Balance: ₹"<< salary - expense - savings - invest
-             << RESET << "\n";
+    void setrates() {
+        cout << C << "\nEnter tax & inflation:\n" << X;
+        tax  = getnum("Tax %: ");
+        infl = getnum("Inflation %: ");
     }
 
-    void healthCheck() const {
-        cout << CYAN << "\n[HEALTH CHECK]\n" << RESET;
-        if (expense > salary) {
-            cout << RED   << "Expense exceeds income by ₹" << expense - salary << ".\n" << RESET;
-        } else if (salary - expense < savings) {
-            cout << RED   << "Savings exceed disposable income. Check numbers.\n" << RESET;
-        } else if (salary - expense - savings < invest) {
-            cout << RED   << "Investments too high for remaining balance.\n" << RESET;
+    void show() {
+        cout << Y << fixed << setprecision(2)
+             << "\nName: " << nm
+             << "\nAge: " << ag
+             << "\nSalary: ₹" << sal
+             << "\nExpense: ₹" << exp
+             << "\nSavings: ₹" << sav
+             << "\nInvest: ₹" << inv
+             << "\nBalance: ₹" << sal - exp - sav - inv
+             << X << "\n";
+    }
+
+    void check() {
+        cout << C << "\nCheck:\n" << X;
+        if (exp > sal) {
+            cout << R << "Expenses exceed salary by ₹" << exp - sal << "\n" << X;
+        } else if (sal - exp < sav) {
+            cout << R << "Savings too high for leftover.\n" << X;
+        } else if (sal - exp - sav < inv) {
+            cout << R << "Investments too high.\n" << X;
         } else {
-            cout << GREEN << "Looks balanced so far.\n" << RESET;
+            cout << G << "Looks fine.\n" << X;
         }
     }
 
-    void setHikes() {
-        cout << CYAN << "\n[INPUT] Estimated monthly hike percentages:\n" << RESET;
-        salhike = readNonNegative("Salary hike (%): ");
-        exphike = readNonNegative("Expense hike (%): ");
-        savinc  = readNonNegative("Savings hike (%): ");
-        invhike = readNonNegative("Investment hike (%): ");
+    void sethike() {
+        cout << C << "\nEnter hikes %:\n" << X;
+        sh  = getnum("Salary: ");
+        eh  = getnum("Expense: ");
+        svh = getnum("Savings: ");
+        ivh = getnum("Invest: ");
 
-        if (savinc > salhike * 2 || invhike > salhike * 2) {
-            cout << RED << "Unrealistic! Savings/Investment hike cannot exceed twice the salary hike.\n" << RESET;
-            hikesSet = false;
+        if (svh > sh * 2 || ivh > sh * 2) {
+            cout << R << "Too big hike.\n" << X;
+            hikeset = false;
             return;
         }
-        hikesSet = true;
+        hikeset = true;
 
-        double ns  = salary  * (1 + salhike / 100);
-        double ne  = expense * (1 + exphike / 100);
-        double nsv = savings * (1 + savinc  / 100);
-        double nin = invest  * (1 + invhike / 100);
-
-        cout << YELLOW << fixed << setprecision(2)
-             << "\n[ESTIMATE] Next month:\n"
-             << "Salary: ₹"     << ns  << "\n"
-             << "Expenses: ₹"   << ne  << "\n"
-             << "Savings: ₹"    << nsv << "\n"
-             << "Investments: ₹"<< nin << RESET << "\n";
+        cout << Y << fixed << setprecision(2)
+             << "\nNext month:\n"
+             << "Salary: ₹" << sal * (1 + sh / 100)
+             << "\nExpense: ₹" << exp * (1 + eh / 100)
+             << "\nSavings: ₹" << sav * (1 + svh / 100)
+             << "\nInvest: ₹" << inv * (1 + ivh / 100)
+             << X << "\n";
     }
 
-    void futureProjection() const {
-        if (!hikesSet) {
-            cout << RED << "Set hike percentages first (menu option 4).\n" << RESET;
+    void proj() {
+        if (!hikeset) {
+            cout << R << "Set hikes first.\n" << X;
             return;
         }
         int m;
-        cout << CYAN << "\n[PROJECTION] Enter months to simulate: " << RESET;
+        cout << C << "Months: " << X;
         cin >> m;
-        double monthlyInfl = inflationRate / 1200.0; 
-        double salaryGrowth     = salary * pow(1 + salhike / 100.0, m);
-        double salaryAfterTax   = salaryGrowth * (1 - taxRate / 100.0);
-        double savingsGrowth    = savings * pow(1 + savinc / 100.0, m);
-        double investGrowth     = invest  * pow(1 + invhike / 100.0, m);
 
-        double inflationFactor = pow(1 + monthlyInfl, m);
-        double realSavings = savingsGrowth / inflationFactor;
-        double realInvest  = investGrowth  / inflationFactor;
+        double mi = infl / 1200.0;
+        double salf = sal * pow(1 + sh / 100.0, m);
+        double salnet = salf * (1 - tax / 100.0);
+        double savf = sav * pow(1 + svh / 100.0, m);
+        double invf = inv * pow(1 + ivh / 100.0, m);
 
-        cout << GREEN << fixed << setprecision(2)
-             << "\n[FORECAST] After " << m << " months:\n"
-             << "Gross Salary: ₹"       << salaryGrowth    << "\n"
-             << "Net Salary (after tax): ₹" << salaryAfterTax << "\n"
-             << "Savings (nominal): ₹"   << savingsGrowth   << "\n"
-             << "Savings (real): ₹"      << realSavings     << "\n"
-             << "Investments (nominal): ₹"<< investGrowth    << "\n"
-             << "Investments (real): ₹"  << realInvest      << RESET << "\n";
-    }
-    void detailedMonthlyProjection() const {
-    if (!hikesSet) {
-        cout << RED << "Set hike percentages first (menu option 5).\n" << RESET;
-        return;
+        double inflf = pow(1 + mi, m);
+        double rs = savf / inflf;
+        double ri = invf / inflf;
+
+        cout << G << fixed << setprecision(2)
+             << "\nAfter " << m << " months:\n"
+             << "Gross Sal: ₹" << salf
+             << "\nNet Sal: ₹" << salnet
+             << "\nSavings: ₹" << savf
+             << "\nSavings real: ₹" << rs
+             << "\nInvest: ₹" << invf
+             << "\nInvest real: ₹" << ri
+             << X << "\n";
     }
 
-    int months;
-    cout << CYAN << "\n[DETAILED SIMULATION] Enter months to simulate: " << RESET;
-    cin >> months;
+    void projall() {
+        if (!hikeset) {
+            cout << R << "Set hikes first.\n" << X;
+            return;
+        }
+        int m;
+        cout << C << "Months: " << X;
+        cin >> m;
 
-    double currentSalary = salary;
-    double totalSavings = 0, totalInvest = 0;
+        double cursal = sal;
+        double totsav = 0, totinv = 0;
 
-    for (int i = 1; i <= months; ++i) {
-        currentSalary *= (1 + salhike / 100.0);
-        double monthlySavings = currentSalary * (savings / salary);
-        double monthlyInvest  = currentSalary * (invest / salary);
+        for (int i = 1; i <= m; ++i) {
+            cursal *= (1 + sh / 100.0);
+            double msav = cursal * (sav / sal);
+            double minv = cursal * (inv / sal);
+            totsav += msav;
+            totinv += minv;
+        }
 
-        totalSavings += monthlySavings;
-        totalInvest  += monthlyInvest;
+        double mi = infl / 1200.0;
+        double inflf = pow(1 + mi, m);
+        double rs = totsav / inflf;
+        double ri = totinv / inflf;
+
+        cout << G << fixed << setprecision(2)
+             << "\nTotal after " << m << " months:\n"
+             << "Nominal Sav: ₹" << totsav
+             << "\nNominal Inv: ₹" << totinv
+             << "\nReal Sav: ₹" << rs
+             << "\nReal Inv: ₹" << ri
+             << "\nReal Total: ₹" << rs + ri
+             << X << "\n";
     }
-
-    double monthlyInflation = inflationRate / 1200.0;
-    double inflationFactor = pow(1 + monthlyInflation, months);
-    double realSavings = totalSavings / inflationFactor;
-    double realInvest  = totalInvest  / inflationFactor;
-
-    cout << GREEN << fixed << setprecision(2)
-         << "\n[PROJECTED TOTAL AFTER " << months << " MONTHS]\n"
-         << "Nominal Savings: ₹" << totalSavings << "\n"
-         << "Nominal Investments: ₹" << totalInvest << "\n"
-         << "Real Savings (adjusted): ₹" << realSavings << "\n"
-         << "Real Investments (adjusted): ₹" << realInvest << "\n"
-         << "Real Net Balance: ₹" << realSavings + realInvest
-         << RESET << "\n";
-}
-
 };
 
 int main() {
-    emp e;
-    int choice;
-    cout << YELLOW << "\n=== PERSONAL FINANCE ASSISTANT (v2) ===\n" << RESET;
-
+    person p;
+    int ch;
+    cout << Y << "\n=== FINANCE TOOL ===\n" << X;
     while (true) {
-        cout << CYAN
-             << "\n1. Enter Financial Data\n"
-             << "2. Enter Tax & Inflation Rates\n"
-             << "3. Show Current Snapshot\n"
-             << "4. Run Health Check\n"
-             << "5. Estimate Next Month (set hikes)\n"
-             << "6. Future Projection (compound growth)\n"
-             << "7. Detailed Future Simulation (real savings+investments)\n"
+        cout << C
+             << "\n1. Data\n"
+             << "2. Tax+Infl\n"
+             << "3. Show\n"
+             << "4. Check\n"
+             << "5. Hikes\n"
+             << "6. Proj simple\n"
+             << "7. Proj all\n"
              << "8. Exit\n"
-             << "Select option: " << RESET;
-        cin >> choice;
-
-    switch (choice) {
-    case 1: e.setData(); break;
-    case 2: e.setRates(); break;
-    case 3: e.showData(); break;
-    case 4: e.healthCheck(); break;
-    case 5: e.setHikes(); break;
-    case 6: e.futureProjection(); break;
-    case 7: e.detailedMonthlyProjection(); break;
-    case 8: cout << GREEN << "Goodbye!\n" << RESET; return 0;
-    default: cout << RED << "Invalid choice.\n" << RESET;
-    }
-
+             << "Pick: " << X;
+        cin >> ch;
+        switch (ch) {
+            case 1: p.setdata(); break;
+            case 2: p.setrates(); break;
+            case 3: p.show(); break;
+            case 4: p.check(); break;
+            case 5: p.sethike(); break;
+            case 6: p.proj(); break;
+            case 7: p.projall(); break;
+            case 8: cout << G << "Bye!\n" << X; return 0;
+            default: cout << R << "Invalid\n" << X;
+        }
     }
 }
