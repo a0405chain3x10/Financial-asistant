@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
+#include <bits/stdc++.h>
 using namespace std;
 
 const string R = "\033[31m";  
